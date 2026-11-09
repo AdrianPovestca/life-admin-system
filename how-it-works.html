@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#FBF8F3">
-<title>How it works — Life Admin System</title>
-<meta name="description" content="See exactly how Life Admin System works. A 5-minute setup to get your life admin organized.">
+<title>How it works — Punctlife</title>
+<meta name="description" content="See exactly how Punctlife works. No complicated setup. Start organizing your life admin in minutes.">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 
 <style>
@@ -32,7 +32,6 @@
   }
   .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
   
-  /* HEADER */
   .site-header {
     position: sticky; top: 0; z-index: 100;
     background: rgba(251,248,243,0.85);
@@ -41,8 +40,10 @@
     border-bottom: 1px solid var(--border);
   }
   .nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; }
-  .logo { font-weight: 800; font-size: 1.1rem; color: var(--text); text-decoration: none; letter-spacing: -0.02em; }
+  
+  .logo { font-weight: 800; font-size: 1.1rem; color: var(--text); text-decoration: none; letter-spacing: -0.02em; display: inline-flex; align-items: center; gap: 4px; }
   .logo span { color: var(--accent); }
+  
   .nav-links { display: flex; gap: 32px; align-items: center; list-style: none; }
   .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.95rem; font-weight: 500; transition: color 0.15s; }
   .nav-links a:hover { color: var(--text); }
@@ -53,17 +54,15 @@
   }
   .nav-cta:hover { background: var(--accent); color: #fff !important; }
   
-  /* PAGE CONTENT */
   .page-header { text-align: center; padding: 80px 0 40px; }
   .page-header h1 { font-size: clamp(2rem, 5vw, 3rem); letter-spacing: -0.03em; margin-bottom: 16px; font-weight: 800; }
   .page-header p { color: var(--text-muted); font-size: 1.15rem; max-width: 600px; margin: 0 auto; }
 
-  /* VIDEO PLACEHOLDER */
   .video-container {
     max-width: 800px; margin: 0 auto 80px; padding: 0 24px;
   }
   .video-wrapper {
-    position: relative; padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    position: relative; padding-bottom: 56.25%;
     background: var(--text); border-radius: 18px; overflow: hidden;
     box-shadow: 0 20px 60px rgba(28,25,23,0.15);
     display: flex; align-items: center; justify-content: center;
@@ -78,7 +77,6 @@
   }
   .video-placeholder-text p { font-size: 1.1rem; font-weight: 600; letter-spacing: 0.02em; }
 
-  /* STEPS */
   .steps-section { padding-bottom: 100px; }
   .step-row {
     display: grid; grid-template-columns: 80px 1fr; gap: 32px;
@@ -108,7 +106,6 @@
   }
   .btn:hover { background: var(--accent); }
 
-  /* FOOTER */
   footer { padding: 40px 0 48px; text-align: center; color: var(--text-muted); font-size: 0.9rem; border-top: 1px solid var(--border); }
   footer .footer-links { display: flex; gap: 24px; justify-content: center; margin-bottom: 12px; flex-wrap: wrap; }
   footer a { color: var(--text-muted); text-decoration: none; }
@@ -127,7 +124,14 @@
 <header class="site-header">
   <div class="container">
     <nav class="nav">
-      <a href="index.html" class="logo">Life Admin<span>.</span></a>
+      <a href="index.html" class="logo">
+        <svg width="16" height="20" viewBox="0 0 20 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: translateY(-1px);">
+          <circle cx="4" cy="6" r="2.5" fill="#C65D3B"/>
+          <circle cx="15" cy="12" r="2.5" fill="#C65D3B"/>
+          <circle cx="4" cy="18" r="2.5" fill="#C65D3B"/>
+        </svg>
+        <span style="font-size: 1.25rem;">L<span>.</span></span>
+      </a>
       <ul class="nav-links">
         <li><a href="index.html#problem">The problem</a></li>
         <li><a href="index.html#what">What you get</a></li>
@@ -142,7 +146,7 @@
 <section class="page-header">
   <div class="container">
     <h1>See exactly how it works.</h1>
-    <p>No complicated setup. No manuals. Here is the full walkthrough, from purchase to having your life admin under control.</p>
+    <p>No complicated setup. No manuals. Here is the full walkthrough, from signing up to having your life admin under control.</p>
   </div>
 </section>
 
@@ -168,22 +172,22 @@
     <div class="step-row">
       <div class="step-number">1</div>
       <div class="step-content">
-        <h2>Buy and get instant access</h2>
-        <p>Once you purchase, you don't have to wait. You will immediately receive an email with a link to the Notion template, along with a short PDF guide to help you get started.</p>
+        <h2>Start your 14-day free trial</h2>
+        <p>Create your account in seconds. You get full access to the entire platform for 14 days, completely free. No credit card required upfront, and no hidden fees.</p>
       </div>
     </div>
     <div class="step-row">
       <div class="step-number">2</div>
       <div class="step-content">
-        <h2>Click "Duplicate"</h2>
-        <p>Notion is free, and you don't need any special technical skills. Just open the link, click the "Duplicate" button in the top right corner, and the entire system is copied into your own workspace.</p>
+        <h2>Add your first document</h2>
+        <p>Don't try to organize everything on day one. Start small. Upload a single bill, add a reminder for an upcoming appointment, or track a subscription you keep forgetting about.</p>
       </div>
     </div>
     <div class="step-row">
       <div class="step-number">3</div>
       <div class="step-content">
-        <h2>Start with just one thing</h2>
-        <p>Don't try to fill everything in on day one. The system is designed to be light. Start by saving your first document, or adding your first bill. The rest of the structure will naturally guide you.</p>
+        <h2>Let the system do the heavy lifting</h2>
+        <p>The dashboard will naturally guide you through the rest. Recurring bills will show up on time, and documents will stay securely organized. You just sit back and breathe.</p>
       </div>
     </div>
   </div>
@@ -192,15 +196,15 @@
 <div class="container" style="padding-bottom: 80px;">
   <div class="cta-box">
     <h2>Ready to take the mental load off?</h2>
-    <p>Set up in 5 minutes. Works perfectly on Notion's free plan.</p>
-    <a href="index.html#get-it" class="btn">Get the system</a>
+    <p>Start your free 14-day trial today. Organize your life admin in minutes.</p>
+    <a href="index.html#get-it" class="btn">Start my free trial</a>
   </div>
 </div>
 
 <footer>
   <div class="container">
     <div class="footer-links">
-      <a href="mailto:contact@example.com">Contact</a>
+      <a href="mailto:contact_p_life@proton.me">Contact</a>
       <a href="terms.html">Terms</a>
       <a href="refund.html">Refund</a>
     </div>
