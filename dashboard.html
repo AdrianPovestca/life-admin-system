@@ -7,171 +7,352 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
-    --bg: #FBF8F3; --surface: #FFFFFF; --text: #1C1917;
-    --text-muted: #57534E; --accent: #C65D3B; --accent-soft: #FEF0E7;
+    --bg: #FBF8F3; --surface: #FFFFFF; --sidebar-bg: #1C1917;
+    --text: #1C1917; --text-muted: #57534E; 
+    --accent: #C65D3B; --accent-soft: #FEF0E7;
     --border: #E7E2D9; --radius: 12px;
+    --shadow-sm: 0 1px 3px rgba(28,25,23,0.06);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
-  .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; height: 100vh; display: flex; overflow: hidden; }
   
-  header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--border); margin-bottom: 40px; }
-  .logo { font-weight: 800; font-size: 1.2rem; color: var(--text); text-decoration: none; }
-  .logo span { color: var(--accent); }
-  button { cursor: pointer; font-family: inherit; border: none; border-radius: 8px; font-weight: 600; transition: 0.2s; }
-  .btn-logout { background: transparent; color: var(--text-muted); font-size: 0.9rem; }
-  .btn-logout:hover { color: var(--text); }
-  .btn-primary { background: var(--text); color: white; padding: 10px 20px; font-size: 0.95rem; }
+  /* SIDEBAR */
+  .sidebar { width: 260px; background: var(--sidebar-bg); color: #fff; display: flex; flex-direction: column; padding: 24px 0; }
+  .sidebar .logo { padding: 0 24px 32px; font-weight: 800; font-size: 1.2rem; color: #fff; text-decoration: none; letter-spacing: -0.02em; }
+  .sidebar .logo span { color: var(--accent); }
+  .nav-item { padding: 12px 24px; color: #A8A29E; text-decoration: none; font-size: 0.95rem; font-weight: 500; display: flex; align-items: center; gap: 12px; transition: 0.2s; cursor: pointer; border: none; background: transparent; width: 100%; text-align: left; font-family: inherit; }
+  .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.05); color: #fff; border-left: 3px solid var(--accent); }
+  .nav-item svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .sidebar-bottom { margin-top: auto; padding: 0 24px; }
+  .btn-logout { width: 100%; padding: 10px; background: transparent; border: 1px solid #444; color: #A8A29E; border-radius: 8px; cursor: pointer; transition: 0.2s; font-family: inherit; }
+  .btn-logout:hover { background: #444; color: #fff; }
+
+  /* MAIN CONTENT */
+  .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
+  .topbar h1 { font-size: 1.25rem; font-weight: 700; }
+  .user-info { display: flex; align-items: center; gap: 12px; font-size: 0.9rem; color: var(--text-muted); }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem; }
+
+  .dashboard-wrapper { padding: 40px; max-width: 1200px; margin: 0 auto; width: 100%; }
+  
+  /* VIEWS (Tab-uri) */
+  .view-section { display: none; animation: fadeIn 0.3s ease; }
+  .view-section.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* CARDS & GRID */
+  .app-grid { display: grid; grid-template-columns: 350px 1fr; gap: 32px; align-items: start; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-sm); }
+  .card h2 { font-size: 1.1rem; margin-bottom: 20px; font-weight: 700; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+  
+  /* FORMS */
+  form { display: flex; flex-direction: column; gap: 16px; }
+  .input-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+  input, select { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.95rem; background: var(--bg); transition: 0.2s; }
+  input:focus, select:focus { outline: none; border-color: var(--accent); background: #fff; }
+  .btn-primary { background: var(--text); color: #fff; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-family: inherit; transition: 0.2s; margin-top: 8px; }
   .btn-primary:hover { background: var(--accent); }
 
-  .header-title { margin-bottom: 30px; }
-  .header-title h1 { font-size: 1.8rem; letter-spacing: -0.02em; }
-  .header-title p { color: var(--text-muted); font-size: 0.95rem; margin-top: 4px; }
+  /* LISTS */
+  .task-list { display: flex; flex-direction: column; gap: 12px; }
+  .task-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; transition: 0.2s; }
+  .task-item:hover { border-color: #D6D3D1; }
+  .task-info h4 { font-size: 1rem; font-weight: 600; margin-bottom: 4px; }
+  .task-info p { font-size: 0.85rem; color: var(--text-muted); }
+  .task-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+  .badge { font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 100px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; }
+  .badge.overdue { background: #FEF3F2; color: #D92D20; }
+  .empty-state { text-align: center; color: var(--text-muted); padding: 40px 0; font-size: 0.95rem; }
 
-  .grid { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; align-items: start; }
-  @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
-
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
-  .card h2 { font-size: 1.1rem; margin-bottom: 16px; }
-  
-  form { display: flex; flex-direction: column; gap: 12px; }
-  input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.95rem; background: var(--bg); }
-  input:focus { outline: none; border-color: var(--accent); }
-
-  ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
-  li { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
-  .task-info strong { display: block; font-size: 1rem; color: var(--text); }
-  .task-info span { font-size: 0.85rem; color: var(--text-muted); }
-  .task-date { font-size: 0.8rem; font-weight: 600; padding: 4px 10px; border-radius: 100px; background: var(--accent-soft); color: var(--accent); }
+  @media (max-width: 900px) {
+    .app-grid { grid-template-columns: 1fr; }
+    .sidebar { width: 70px; }
+    .sidebar .logo, .nav-item span, .sidebar-bottom { display: none; }
+    .nav-item { justify-content: center; padding: 16px; }
+    .dashboard-wrapper { padding: 20px; }
+  }
 </style>
 </head>
 <body>
 
-<div class="container">
-  <header>
-    <a href="index.html" class="logo">L<span>.</span></a>
-    <div>
-      <span id="user-email" style="font-size: 0.85rem; color: var(--text-muted); margin-right: 15px;"></span>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="#" class="logo">Punct<span>Life</span></a>
+    
+    <button class="nav-item active" data-target="view-overview">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+      <span>Overview</span>
+    </button>
+    
+    <button class="nav-item" data-target="view-matters">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+      <span>Matters</span>
+    </button>
+    
+    <button class="nav-item" data-target="view-deadlines">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+      <span>Deadlines</span>
+    </button>
+    
+    <button class="nav-item" data-target="view-correspondence">
+      <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      <span>Correspondence</span>
+    </button>
+
+    <div class="sidebar-bottom">
       <button class="btn-logout" id="logout-btn">Log out</button>
     </div>
-  </header>
+  </aside>
 
-  <div class="header-title">
-    <h1>Your Dashboard</h1>
-    <p>Everything you need to keep track of, in one calm place.</p>
-  </div>
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <header class="topbar">
+      <h1 id="page-title">Overview</h1>
+      <div class="user-info">
+        <span id="user-email">Loading...</span>
+        <div class="avatar" id="user-avatar">U</div>
+      </div>
+    </header>
 
-  <div class="grid">
-    <!-- Formular Adăugare Task -->
-    <div class="card">
-      <h2>Add a new matter</h2>
-      <form id="add-matter-form">
-        <input type="text" id="matter-name" placeholder="What needs to be done?" required>
-        <input type="text" id="matter-step" placeholder="Next step (optional)">
-        <input type="date" id="matter-deadline" required>
-        <button type="submit" class="btn-primary" style="margin-top: 8px;">Add to list</button>
-      </form>
+    <div class="dashboard-wrapper">
+      
+      <!-- VIEW: OVERVIEW -->
+      <section id="view-overview" class="view-section active">
+        <div class="card">
+          <h2>Welcome to your calm space.</h2>
+          <p style="color: var(--text-muted); margin-bottom: 20px;">Use the menu on the left to manage your Matters, Deadlines, and Correspondence. Everything you add is saved securely to your account.</p>
+        </div>
+      </section>
+
+      <!-- VIEW: MATTERS -->
+      <section id="view-matters" class="view-section">
+        <div class="app-grid">
+          <div class="card">
+            <h2>Add a matter</h2>
+            <form id="form-matter">
+              <div class="input-group">
+                <label>Task name</label>
+                <input type="text" id="m-name" placeholder="e.g. Pay electricity bill" required>
+              </div>
+              <div class="input-group">
+                <label>Next step</label>
+                <input type="text" id="m-step" placeholder="e.g. Check bank app">
+              </div>
+              <div class="input-group">
+                <label>Deadline</label>
+                <input type="date" id="m-deadline" required>
+              </div>
+              <button type="submit" class="btn-primary">Save Matter</button>
+            </form>
+          </div>
+          <div class="card">
+            <h2>Active Matters</h2>
+            <div class="task-list" id="list-matters"><div class="empty-state">Loading...</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: DEADLINES -->
+      <section id="view-deadlines" class="view-section">
+        <div class="app-grid">
+          <div class="card">
+            <h2>Add a deadline</h2>
+            <form id="form-deadline">
+              <div class="input-group">
+                <label>Deadline name</label>
+                <input type="text" id="d-name" placeholder="e.g. Car insurance renewal" required>
+              </div>
+              <div class="input-group">
+                <label>Due date</label>
+                <input type="date" id="d-date" required>
+              </div>
+              <div class="input-group">
+                <label>Category</label>
+                <select id="d-category">
+                  <option value="Taxes">Taxes</option>
+                  <option value="Insurance">Insurance</option>
+                  <option value="Health">Health</option>
+                  <option value="Home">Home</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <button type="submit" class="btn-primary">Save Deadline</button>
+            </form>
+          </div>
+          <div class="card">
+            <h2>Upcoming Deadlines</h2>
+            <div class="task-list" id="list-deadlines"><div class="empty-state">Loading...</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: CORRESPONDENCE -->
+      <section id="view-correspondence" class="view-section">
+        <div class="app-grid">
+          <div class="card">
+            <h2>Log a letter/email</h2>
+            <form id="form-correspondence">
+              <div class="input-group">
+                <label>Subject</label>
+                <input type="text" id="c-subject" placeholder="e.g. Notice of Overdue Payment" required>
+              </div>
+              <div class="input-group">
+                <label>Institution</label>
+                <input type="text" id="c-institution" placeholder="e.g. City Hall" required>
+              </div>
+              <div class="input-group">
+                <label>Date received</label>
+                <input type="date" id="c-date" required>
+              </div>
+              <div class="input-group">
+                <label>Reply By</label>
+                <input type="date" id="c-reply" required>
+              </div>
+              <button type="submit" class="btn-primary">Save Record</button>
+            </form>
+          </div>
+          <div class="card">
+            <h2>Correspondence Log</h2>
+            <div class="task-list" id="list-correspondence"><div class="empty-state">Loading...</div></div>
+          </div>
+        </div>
+      </section>
+
     </div>
-
-    <!-- Lista de Task-uri -->
-    <div>
-      <h2 style="font-size: 1.1rem; margin-bottom: 16px;">Active Matters</h2>
-      <ul id="matters-list">
-        <li><span style="color: var(--text-muted); font-size: 0.9rem;">Loading your tasks...</span></li>
-      </ul>
-    </div>
-  </div>
-</div>
+  </main>
 
 <script>
-  // AICI PUI DIN NOU CHEILE TALE SUPABASE
-  const SUPABASE_URL = 'AICI_PUI_CHEIA_TA_URL';
+  // 1. PUNE CHEILE TALE AICI
+  const SUPABASE_URL = 'AICI_PUI_CHEIA_TA_URL'; 
   const SUPABASE_ANON_KEY = 'AICI_PUI_CHEIA_TA_ANON';
+  
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
   let currentUser = null;
 
-  // 1. Verificăm dacă utilizatorul este logat
+  // 2. Verificare Autentificare
   async function checkUser() {
     const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session) {
-      // Dacă nu e logat, îl trimitem înapoi la pagina principală
-      window.location.href = 'index.html';
-    } else {
-      currentUser = session.user;
-      document.getElementById('user-email').innerText = currentUser.email;
-      loadMatters();
-    }
+    if (!session) { window.location.href = 'index.html'; return; }
+    
+    currentUser = session.user;
+    document.getElementById('user-email').innerText = currentUser.email;
+    document.getElementById('user-avatar').innerText = currentUser.email.charAt(0).toUpperCase();
+    
+    // Încărcăm toate datele la login
+    loadAllData();
   }
 
-  // 2. Încărcăm task-urile din baza de date
+  // 3. Logica de navigare între tab-uri
+  const navItems = document.querySelectorAll('.nav-item');
+  const viewSections = document.querySelectorAll('.view-section');
+  const pageTitle = document.getElementById('page-title');
+
+  navItems.forEach(btn => {
+    btn.addEventListener('click', () => {
+      // Elimină clasa activă de pe toate
+      navItems.forEach(n => n.classList.remove('active'));
+      viewSections.forEach(v => v.classList.remove('active'));
+      
+      // Adaugă clasa activă pe cel apăsat
+      btn.classList.add('active');
+      const targetId = btn.getAttribute('data-target');
+      document.getElementById(targetId).classList.add('active');
+      
+      // Schimbă titlul paginii
+      pageTitle.innerText = btn.querySelector('span').innerText;
+    });
+  });
+
+  // 4. Funcții de încărcare date
+  async function loadAllData() {
+    loadMatters();
+    loadDeadlines();
+    loadCorrespondence();
+  }
+
+  // --- MATTERS ---
   async function loadMatters() {
-    const { data, error } = await supabaseClient
-      .from('matters')
-      .select('*')
-      .order('deadline', { ascending: true });
-
-    const list = document.getElementById('matters-list');
-    list.innerHTML = '';
-
-    if (error) {
-      list.innerHTML = `<li>Error loading tasks.</li>`;
-      return;
-    }
-
-    if (data.length === 0) {
-      list.innerHTML = `<li style="justify-content: center; color: var(--text-muted); font-size: 0.9rem;">No active matters. You're all caught up.</li>`;
-      return;
-    }
-
-    data.forEach(matter => {
-      const li = document.createElement('li');
-      li.innerHTML = `
-        <div class="task-info">
-          <strong>${matter.name}</strong>
-          <span>${matter.next_step || 'No next step set'}</span>
-        </div>
-        <div class="task-date">${matter.deadline}</div>
-      `;
-      list.appendChild(li);
+    const { data, error } = await supabaseClient.from('matters').select('*').order('deadline', { ascending: true });
+    const list = document.getElementById('list-matters');
+    if (error) { list.innerHTML = `<div class="empty-state" style="color:red">${error.message}</div>`; return; }
+    
+    list.innerHTML = data.length === 0 ? `<div class="empty-state">No active matters.</div>` : '';
+    data.forEach(item => {
+      list.innerHTML += `
+        <div class="task-item">
+          <div class="task-info"><h4>${item.name}</h4><p>${item.next_step || 'No next step'}</p></div>
+          <div class="task-meta"><span class="badge">${item.deadline}</span></div>
+        </div>`;
     });
   }
 
-  // 3. Adăugăm un task nou
-  document.getElementById('add-matter-form').addEventListener('submit', async (e) => {
+  document.getElementById('form-matter').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const btn = e.target.querySelector('button');
-    btn.innerText = 'Adding...';
-    btn.disabled = true;
-
-    const newMatter = {
-      user_id: currentUser.id, // Îl legăm de utilizatorul logat
-      name: document.getElementById('matter-name').value,
-      next_step: document.getElementById('matter-step').value,
-      deadline: document.getElementById('matter-deadline').value,
-      status: 'To Do'
-    };
-
-    const { error } = await supabaseClient.from('matters').insert([newMatter]);
-
-    if (error) {
-      alert('Error adding matter: ' + error.message);
-    } else {
-      document.getElementById('add-matter-form').reset();
-      loadMatters(); // Reîncărcăm lista
-    }
-
-    btn.innerText = 'Add to list';
-    btn.disabled = false;
+    await supabaseClient.from('matters').insert([{
+      user_id: currentUser.id, name: document.getElementById('m-name').value,
+      next_step: document.getElementById('m-step').value, deadline: document.getElementById('m-deadline').value
+    }]);
+    e.target.reset(); loadMatters();
   });
 
-  // 4. Logout
+  // --- DEADLINES ---
+  async function loadDeadlines() {
+    const { data, error } = await supabaseClient.from('deadlines').select('*').order('due_date', { ascending: true });
+    const list = document.getElementById('list-deadlines');
+    if (error) { list.innerHTML = `<div class="empty-state" style="color:red">${error.message}</div>`; return; }
+    
+    list.innerHTML = data.length === 0 ? `<div class="empty-state">No upcoming deadlines.</div>` : '';
+    data.forEach(item => {
+      list.innerHTML += `
+        <div class="task-item">
+          <div class="task-info"><h4>${item.name}</h4><p>Category: ${item.category}</p></div>
+          <div class="task-meta"><span class="badge">${item.due_date}</span></div>
+        </div>`;
+    });
+  }
+
+  document.getElementById('form-deadline').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await supabaseClient.from('deadlines').insert([{
+      user_id: currentUser.id, name: document.getElementById('d-name').value,
+      due_date: document.getElementById('d-date').value, category: document.getElementById('d-category').value
+    }]);
+    e.target.reset(); loadDeadlines();
+  });
+
+  // --- CORRESPONDENCE ---
+  async function loadCorrespondence() {
+    const { data, error } = await supabaseClient.from('correspondence').select('*').order('date', { ascending: false });
+    const list = document.getElementById('list-correspondence');
+    if (error) { list.innerHTML = `<div class="empty-state" style="color:red">${error.message}</div>`; return; }
+    
+    list.innerHTML = data.length === 0 ? `<div class="empty-state">No letters logged.</div>` : '';
+    data.forEach(item => {
+      list.innerHTML += `
+        <div class="task-item">
+          <div class="task-info"><h4>${item.subject}</h4><p>${item.institution} — Received: ${item.date}</p></div>
+          <div class="task-meta"><span class="badge overdue">Reply by: ${item.reply_by}</span></div>
+        </div>`;
+    });
+  }
+
+  document.getElementById('form-correspondence').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await supabaseClient.from('correspondence').insert([{
+      user_id: currentUser.id, subject: document.getElementById('c-subject').value,
+      institution: document.getElementById('c-institution').value, date: document.getElementById('c-date').value,
+      reply_by: document.getElementById('c-reply').value
+    }]);
+    e.target.reset(); loadCorrespondence();
+  });
+
+  // 5. Logout
   document.getElementById('logout-btn').addEventListener('click', async () => {
     await supabaseClient.auth.signOut();
     window.location.href = 'index.html';
   });
 
-  // Pornim verificarea la încărcarea paginii
   checkUser();
 </script>
 </body>
