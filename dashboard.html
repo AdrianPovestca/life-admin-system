@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Punctlife</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --bg: #FBF8F3; --surface: #FFFFFF; --text: #1C1917;
+    --text-muted: #57534E; --accent: #C65D3B; --accent-soft: #FEF0E7;
+    --border: #E7E2D9; --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+  
+  header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--border); margin-bottom: 40px; }
+  .logo { font-weight: 800; font-size: 1.2rem; color: var(--text); text-decoration: none; }
+  .logo span { color: var(--accent); }
+  button { cursor: pointer; font-family: inherit; border: none; border-radius: 8px; font-weight: 600; transition: 0.2s; }
+  .btn-logout { background: transparent; color: var(--text-muted); font-size: 0.9rem; }
+  .btn-logout:hover { color: var(--text); }
+  .btn-primary { background: var(--text); color: white; padding: 10px 20px; font-size: 0.95rem; }
+  .btn-primary:hover { background: var(--accent); }
+
+  .header-title { margin-bottom: 30px; }
+  .header-title h1 { font-size: 1.8rem; letter-spacing: -0.02em; }
+  .header-title p { color: var(--text-muted); font-size: 0.95rem; margin-top: 4px; }
+
+  .grid { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; align-items: start; }
+  @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+  .card h2 { font-size: 1.1rem; margin-bottom: 16px; }
+  
+  form { display: flex; flex-direction: column; gap: 12px; }
+  input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.95rem; background: var(--bg); }
+  input:focus { outline: none; border-color: var(--accent); }
+
+  ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  li { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
+  .task-info strong { display: block; font-size: 1rem; color: var(--text); }
+  .task-info span { font-size: 0.85rem; color: var(--text-muted); }
+  .task-date { font-size: 0.8rem; font-weight: 600; padding: 4px 10px; border-radius: 100px; background: var(--accent-soft); color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <a href="index.html" class="logo">L<span>.</span></a>
+    <div>
+      <span id="user-email" style="font-size: 0.85rem; color: var(--text-muted); margin-right: 15px;"></span>
+      <button class="btn-logout" id="logout-btn">Log out</button>
+    </div>
+  </header>
+
+  <div class="header-title">
+    <h1>Your Dashboard</h1>
+    <p>Everything you need to keep track of, in one calm place.</p>
+  </div>
+
+  <div class="grid">
+    <!-- Formular Adăugare Task -->
+    <div class="card">
+      <h2>Add a new matter</h2>
+      <form id="add-matter-form">
+        <input type="text" id="matter-name" placeholder="What needs to be done?" required>
+        <input type="text" id="matter-step" placeholder="Next step (optional)">
+        <input type="date" id="matter-deadline" required>
+        <button type="submit" class="btn-primary" style="margin-top: 8px;">Add to list</button>
+      </form>
+    </div>
+
+    <!-- Lista de Task-uri -->
+    <div>
+      <h2 style="font-size: 1.1rem; margin-bottom: 16px;">Active Matters</h2>
+      <ul id="matters-list">
+        <li><span style="color: var(--text-muted); font-size: 0.9rem;">Loading your tasks...</span></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  // AICI PUI DIN NOU CHEILE TALE SUPABASE
+  const SUPABASE_URL = 'AICI_PUI_CHEIA_TA_URL';
+  const SUPABASE_ANON_KEY = 'AICI_PUI_CHEIA_TA_ANON';
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  let currentUser = null;
+
+  // 1. Verificăm dacă utilizatorul este logat
+  async function checkUser() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) {
+      // Dacă nu e logat, îl trimitem înapoi la pagina principală
+      window.location.href = 'index.html';
+    } else {
+      currentUser = session.user;
+      document.getElementById('user-email').innerText = currentUser.email;
+      loadMatters();
+    }
+  }
+
+  // 2. Încărcăm task-urile din baza de date
+  async function loadMatters() {
+    const { data, error } = await supabaseClient
+      .from('matters')
+      .select('*')
+      .order('deadline', { ascending: true });
+
+    const list = document.getElementById('matters-list');
+    list.innerHTML = '';
+
+    if (error) {
+      list.innerHTML = `<li>Error loading tasks.</li>`;
+      return;
+    }
+
+    if (data.length === 0) {
+      list.innerHTML = `<li style="justify-content: center; color: var(--text-muted); font-size: 0.9rem;">No active matters. You're all caught up.</li>`;
+      return;
+    }
+
+    data.forEach(matter => {
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <div class="task-info">
+          <strong>${matter.name}</strong>
+          <span>${matter.next_step || 'No next step set'}</span>
+        </div>
+        <div class="task-date">${matter.deadline}</div>
+      `;
+      list.appendChild(li);
+    });
+  }
+
+  // 3. Adăugăm un task nou
+  document.getElementById('add-matter-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button');
+    btn.innerText = 'Adding...';
+    btn.disabled = true;
+
+    const newMatter = {
+      user_id: currentUser.id, // Îl legăm de utilizatorul logat
+      name: document.getElementById('matter-name').value,
+      next_step: document.getElementById('matter-step').value,
+      deadline: document.getElementById('matter-deadline').value,
+      status: 'To Do'
+    };
+
+    const { error } = await supabaseClient.from('matters').insert([newMatter]);
+
+    if (error) {
+      alert('Error adding matter: ' + error.message);
+    } else {
+      document.getElementById('add-matter-form').reset();
+      loadMatters(); // Reîncărcăm lista
+    }
+
+    btn.innerText = 'Add to list';
+    btn.disabled = false;
+  });
+
+  // 4. Logout
+  document.getElementById('logout-btn').addEventListener('click', async () => {
+    await supabaseClient.auth.signOut();
+    window.location.href = 'index.html';
+  });
+
+  // Pornim verificarea la încărcarea paginii
+  checkUser();
+</script>
+</body>
+</html>

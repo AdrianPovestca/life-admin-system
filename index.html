@@ -807,14 +807,14 @@
         alert('Account created successfully! Welcome to Punctlife.');
         modal.classList.remove('active');
         // Aici vom redirecționa către dashboard mai târziu
-        // window.location.href = 'dashboard.html';
+         window.location.href = 'dashboard.html';
       } else {
         const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error) throw error;
         
         alert('Logged in successfully!');
         modal.classList.remove('active');
-        // window.location.href = 'dashboard.html';
+         window.location.href = 'dashboard.html';
       }
     } catch (error) {
       authError.innerText = error.message;
