@@ -23,6 +23,9 @@
 
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
   :root {
     --bg: #FBF8F3;
@@ -296,6 +299,36 @@
   footer a { color: var(--text-muted); text-decoration: none; transition: color 0.15s; }
   footer a:hover { color: var(--text); }
 
+  /* Stiluri pentru fereastra de Login/Register (Modal) */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(28, 25, 23, 0.6); backdrop-filter: blur(4px);
+    display: none; align-items: center; justify-content: center; z-index: 1000;
+  }
+  .modal-overlay.active { display: flex; }
+  .auth-modal {
+    background: var(--surface); padding: 40px; border-radius: var(--radius);
+    width: 100%; max-width: 400px; box-shadow: var(--shadow-lg); position: relative;
+    text-align: left;
+  }
+  .auth-modal h2 { font-size: 1.5rem; margin-bottom: 8px; font-weight: 800; }
+  .auth-modal p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px; }
+  .auth-modal input {
+    width: 100%; padding: 12px 16px; margin-bottom: 16px;
+    border: 1px solid var(--border); border-radius: 10px;
+    font-family: inherit; font-size: 1rem; background: var(--bg); color: var(--text);
+  }
+  .auth-modal input:focus { outline: none; border-color: var(--accent); }
+  .auth-modal .btn { width: 100%; margin-bottom: 16px; }
+  .close-modal {
+    position: absolute; top: 16px; right: 16px; background: none; border: none;
+    font-size: 1.5rem; cursor: pointer; color: var(--text-muted);
+  }
+  .close-modal:hover { color: var(--text); }
+  .auth-toggle { font-size: 0.9rem; text-align: center; color: var(--text-muted); }
+  .auth-toggle a { color: var(--accent); text-decoration: none; font-weight: 600; cursor: pointer; }
+  .auth-error { color: #D92D20; font-size: 0.85rem; margin-bottom: 16px; display: none; padding: 10px; background: #FEF3F2; border-radius: 8px; }
+
   @media (max-width: 768px) {
     .nav-links { display: none; }
     .hamburger { display: block; }
@@ -318,6 +351,7 @@
     .mockup-item { padding: 12px 16px; font-size: 0.9rem; }
     .mockup-header { padding: 12px 16px; }
     .section-header { margin-bottom: 44px; }
+    .auth-modal { padding: 30px 20px; width: 90%; }
   }
 </style>
 </head>
@@ -327,7 +361,6 @@
   <div class="container">
     <nav class="nav" aria-label="Main navigation">
       
-      <!-- NOUL LOGO PUNCTLIFE -->
       <a href="#" class="logo" style="display: inline-flex; align-items: center; gap: 4px;">
         <svg width="16" height="20" viewBox="0 0 20 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: translateY(-1px);">
           <circle cx="4" cy="6" r="2.5" fill="#C65D3B"/>
@@ -342,7 +375,7 @@
         <li><a href="#what">What you get</a></li>
         <li><a href="how-it-works.html">How it works</a></li>
         <li><a href="#faq">FAQ</a></li>
-        <li><a href="#get-it" class="nav-cta">Get it now</a></li>
+        <li><a href="#get-it" class="nav-cta auth-trigger">Get it now</a></li>
       </ul>
       <button class="hamburger" id="hamburger" aria-label="Open menu" aria-controls="mobile-menu" aria-expanded="false">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -358,7 +391,7 @@
         <li><a href="#what">What you get</a></li>
         <li><a href="how-it-works.html">How it works</a></li>
         <li><a href="#faq">FAQ</a></li>
-        <li><a href="#get-it" class="nav-cta-mobile">Get it now</a></li>
+        <li><a href="#get-it" class="nav-cta-mobile auth-trigger">Get it now</a></li>
       </ul>
     </div>
   </div>
@@ -370,7 +403,7 @@
     <h1>Stop carrying it all in your head.</h1>
     <p class="sub">Bills, subscriptions, documents, appointments. All in one place, built to take the mental load off. So you can get back to living, not managing.</p>
     <div class="cta-group">
-      <a href="#get-it" class="btn btn-primary">I want this</a>
+      <a href="#get-it" class="btn btn-primary auth-trigger">I want this</a>
       <a href="how-it-works.html" class="btn btn-secondary">See how it works</a>
     </div>
     <p class="hero-note">5-minute setup. Start your free 14-day trial. Lifetime access.</p>
@@ -658,9 +691,32 @@
   <section class="final-cta" id="get-it">
     <h2>You can breathe again.</h2>
     <p>One system. All the important things. No more fear of forgetting.</p>
-    <a href="#" class="btn btn-primary" data-cta="gumroad">Start your free trial</a>
+    <a href="#" class="btn btn-primary auth-trigger">Start your free trial</a>
     <p class="guarantee">14-day free trial. No credit card required upfront.</p>
   </section>
+</div>
+
+<!-- Modal pentru Login / Register -->
+<div class="modal-overlay" id="auth-modal">
+  <div class="auth-modal">
+    <button class="close-modal" id="close-modal">&times;</button>
+    
+    <h2 id="modal-title">Create your account</h2>
+    <p id="modal-subtitle">Start your 14-day free trial. No credit card required.</p>
+    
+    <div class="auth-error" id="auth-error"></div>
+
+    <form id="auth-form">
+      <input type="email" id="email" placeholder="Email address" required>
+      <input type="password" id="password" placeholder="Password (min. 6 characters)" required>
+      <button type="submit" class="btn btn-primary" id="submit-btn">Create account</button>
+    </form>
+
+    <p class="auth-toggle">
+      <span id="toggle-text">Already have an account?</span> 
+      <a id="toggle-auth-mode">Log in</a>
+    </p>
+  </div>
 </div>
 
 <footer>
@@ -676,25 +732,102 @@
 </footer>
 
 <script>
-  const GUMROAD_URL = ""; // e.g. "https://yourname.gumroad.com/l/life-admin"
+  // ==========================================
+  // 1. AICI PUI CHEILE TALE DE LA SUPABASE
+  // ==========================================
+  const SUPABASE_URL = 'https://rsmordflwmoqvbmtfoef.supabase.co'; 
+  const SUPABASE_ANON_KEY = 'sb_publishable_zJXrQMwtE0pojxkPwiJ3qA__mFp4nAp';
 
-  const ctaButtons = document.querySelectorAll('[data-cta="gumroad"]');
-  if (GUMROAD_URL) {
-    ctaButtons.forEach(btn => {
-      btn.setAttribute('href', GUMROAD_URL);
-      btn.setAttribute('target', '_blank');
-      btn.setAttribute('rel', 'noopener noreferrer');
-    });
-  }
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // Logica pentru UI-ul de Login/Register
+  let isSignUp = true; 
+  const modal = document.getElementById('auth-modal');
+  const closeModal = document.getElementById('close-modal');
+  const toggleBtn = document.getElementById('toggle-auth-mode');
+  const modalTitle = document.getElementById('modal-title');
+  const modalSubtitle = document.getElementById('modal-subtitle');
+  const submitBtn = document.getElementById('submit-btn');
+  const toggleText = document.getElementById('toggle-text');
+  const authForm = document.getElementById('auth-form');
+  const authError = document.getElementById('auth-error');
+
+  // Deschide modalul pe orice buton de CTA
+  const ctaButtons = document.querySelectorAll('.auth-trigger');
   ctaButtons.forEach(btn => {
     btn.addEventListener('click', (e) => {
-      if (!GUMROAD_URL) {
-        e.preventDefault();
-        alert("The Gumroad link isn't set yet.\n\nOpen index.html, find:\nconst GUMROAD_URL = \"\";\nand add your Gumroad link there.");
-      }
+      e.preventDefault();
+      modal.classList.add('active');
     });
   });
 
+  // Închide modalul
+  closeModal.addEventListener('click', () => {
+    modal.classList.remove('active');
+    authError.style.display = 'none';
+  });
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.classList.remove('active');
+  });
+
+  // Schimbă între Sign Up și Log In
+  toggleBtn.addEventListener('click', () => {
+    isSignUp = !isSignUp;
+    authError.style.display = 'none';
+    if (isSignUp) {
+      modalTitle.innerText = 'Create your account';
+      modalSubtitle.innerText = 'Start your 14-day free trial. No credit card required.';
+      submitBtn.innerText = 'Create account';
+      toggleText.innerText = 'Already have an account?';
+      toggleBtn.innerText = 'Log in';
+    } else {
+      modalTitle.innerText = 'Welcome back';
+      modalSubtitle.innerText = 'Log in to access your dashboard.';
+      submitBtn.innerText = 'Log in';
+      toggleText.innerText = "Don't have an account?";
+      toggleBtn.innerText = 'Sign up';
+    }
+  });
+
+  // Trimite formularul către Supabase
+  authForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    submitBtn.innerText = 'Please wait...';
+    submitBtn.disabled = true;
+    authError.style.display = 'none';
+
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    try {
+      if (isSignUp) {
+        const { data, error } = await supabaseClient.auth.signUp({ email, password });
+        if (error) throw error;
+        
+        alert('Account created successfully! Welcome to Punctlife.');
+        modal.classList.remove('active');
+        // Aici vom redirecționa către dashboard mai târziu
+        // window.location.href = 'dashboard.html';
+      } else {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        
+        alert('Logged in successfully!');
+        modal.classList.remove('active');
+        // window.location.href = 'dashboard.html';
+      }
+    } catch (error) {
+      authError.innerText = error.message;
+      authError.style.display = 'block';
+    } finally {
+      submitBtn.innerText = isSignUp ? 'Create account' : 'Log in';
+      submitBtn.disabled = false;
+    }
+  });
+
+  // ==========================================
+  // LOGICA PENTRU MENIU MOBIL, SCROLL, ETC.
+  // ==========================================
   const hamburger = document.getElementById('hamburger');
   const mobileMenu = document.getElementById('mobile-menu');
   hamburger.addEventListener('click', () => {
@@ -710,7 +843,7 @@
     });
   });
 
-  document.querySelectorAll('a[href^="#"]:not([data-cta="gumroad"])').forEach(link => {
+  document.querySelectorAll('a[href^="#"]:not(.auth-trigger)').forEach(link => {
     link.addEventListener('click', (e) => {
       const href = link.getAttribute('href');
       if (href === '#' || href.length < 2) return;
