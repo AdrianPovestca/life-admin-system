@@ -3,214 +3,46 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#FBF8F3">
 <title>How it works — Punctlife</title>
-<meta name="description" content="See exactly how Punctlife works. No complicated setup. Start organizing your life admin in minutes.">
-<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-
+<link rel="stylesheet" href="style.css"> <!-- Dacă ai un fișier CSS comun, altfel lasă stilurile inline -->
 <style>
-  :root {
-    --bg: #FBF8F3;
-    --surface: #FFFFFF;
-    --text: #1C1917;
-    --text-muted: #57534E;
-    --accent: #C65D3B;
-    --accent-soft: #FEF0E7;
-    --border: #E7E2D9;
-    --radius: 14px;
-    --shadow-sm: 0 1px 3px rgba(28,25,23,0.06), 0 8px 24px rgba(28,25,23,0.06);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.65;
-    font-size: 16px;
-    -webkit-font-smoothing: antialiased;
-  }
-  .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
-  
-  .site-header {
-    position: sticky; top: 0; z-index: 100;
-    background: rgba(251,248,243,0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border);
-  }
-  .nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; }
-  
-  .logo { font-weight: 800; font-size: 1.1rem; color: var(--text); text-decoration: none; letter-spacing: -0.02em; display: inline-flex; align-items: center; gap: 4px; }
-  .logo span { color: var(--accent); }
-  
-  .nav-links { display: flex; gap: 32px; align-items: center; list-style: none; }
-  .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.95rem; font-weight: 500; transition: color 0.15s; }
-  .nav-links a:hover { color: var(--text); }
-  .nav-cta {
-    background: var(--text); color: var(--bg) !important;
-    padding: 10px 18px; border-radius: 10px; font-weight: 600 !important;
-    transition: background 0.15s;
-  }
-  .nav-cta:hover { background: var(--accent); color: #fff !important; }
-  
-  .page-header { text-align: center; padding: 80px 0 40px; }
-  .page-header h1 { font-size: clamp(2rem, 5vw, 3rem); letter-spacing: -0.03em; margin-bottom: 16px; font-weight: 800; }
-  .page-header p { color: var(--text-muted); font-size: 1.15rem; max-width: 600px; margin: 0 auto; }
-
-  .video-container {
-    max-width: 800px; margin: 0 auto 80px; padding: 0 24px;
-  }
-  .video-wrapper {
-    position: relative; padding-bottom: 56.25%;
-    background: var(--text); border-radius: 18px; overflow: hidden;
-    box-shadow: 0 20px 60px rgba(28,25,23,0.15);
-    display: flex; align-items: center; justify-content: center;
-  }
-  .video-placeholder-text {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    color: var(--bg); text-align: center;
-  }
-  .video-placeholder-text svg {
-    width: 64px; height: 64px; fill: none; stroke: var(--accent); stroke-width: 1.5;
-    margin-bottom: 16px; opacity: 0.8;
-  }
-  .video-placeholder-text p { font-size: 1.1rem; font-weight: 600; letter-spacing: 0.02em; }
-
-  .steps-section { padding-bottom: 100px; }
-  .step-row {
-    display: grid; grid-template-columns: 80px 1fr; gap: 32px;
-    margin-bottom: 48px; align-items: start;
-  }
-  .step-number {
-    width: 64px; height: 64px; border-radius: 50%;
-    background: var(--surface); border: 1px solid var(--border); color: var(--text);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.5rem; font-weight: 700; box-shadow: var(--shadow-sm);
-  }
-  .step-content h2 { font-size: 1.4rem; margin-bottom: 8px; font-weight: 700; }
-  .step-content p { color: var(--text-muted); font-size: 1.05rem; }
-
-  .cta-box {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 18px; padding: 48px 32px; text-align: center;
-    box-shadow: var(--shadow-sm);
-  }
-  .cta-box h2 { font-size: 1.75rem; margin-bottom: 16px; font-weight: 800; }
-  .cta-box p { color: var(--text-muted); margin-bottom: 24px; }
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    padding: 14px 26px; border-radius: 12px; font-weight: 600; font-size: 1rem;
-    text-decoration: none; cursor: pointer; border: none;
-    background: var(--text); color: var(--bg); transition: background 0.15s;
-  }
-  .btn:hover { background: var(--accent); }
-
-  footer { padding: 40px 0 48px; text-align: center; color: var(--text-muted); font-size: 0.9rem; border-top: 1px solid var(--border); }
-  footer .footer-links { display: flex; gap: 24px; justify-content: center; margin-bottom: 12px; flex-wrap: wrap; }
-  footer a { color: var(--text-muted); text-decoration: none; }
-  footer a:hover { color: var(--text); }
-
-  @media (max-width: 768px) {
-    .nav-links { display: none; }
-    .step-row { grid-template-columns: 1fr; gap: 16px; text-align: center; }
-    .step-number { margin: 0 auto; }
-    .video-container { margin-bottom: 40px; }
-  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #FBF8F3; color: #1C1917; line-height: 1.6; margin: 0; padding: 40px 20px; }
+  .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 50px; border-radius: 14px; border: 1px solid #E7E2D9; }
+  h1 { font-weight: 800; margin-bottom: 24px; font-size: 2rem; }
+  h2 { font-size: 1.25rem; margin-top: 32px; margin-bottom: 12px; }
+  p { color: #57534E; margin-bottom: 16px; }
+  .step-box { background: #FBF8F3; border: 1px solid #E7E2D9; padding: 24px; border-radius: 12px; margin-bottom: 20px; }
+  .step-box h3 { margin-top: 0; color: #6B7D66; }
+  .btn { display: inline-block; background: #1C1917; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; margin-top: 20px; transition: 0.2s; }
+  .btn:hover { background: #6B7D66; }
+  a.back { display: inline-block; margin-bottom: 24px; color: #6B7D66; text-decoration: none; font-weight: 600; }
 </style>
 </head>
 <body>
-
-<header class="site-header">
   <div class="container">
-    <nav class="nav">
-      <a href="index.html" class="logo">
-        <svg width="16" height="20" viewBox="0 0 20 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: translateY(-1px);">
-          <circle cx="4" cy="6" r="2.5" fill="#C65D3B"/>
-          <circle cx="15" cy="12" r="2.5" fill="#C65D3B"/>
-          <circle cx="4" cy="18" r="2.5" fill="#C65D3B"/>
-        </svg>
-        <span style="font-size: 1.25rem;">L<span>.</span></span>
-      </a>
-      <ul class="nav-links">
-        <li><a href="index.html#problem">The problem</a></li>
-        <li><a href="index.html#what">What you get</a></li>
-        <li><a href="how-it-works.html">How it works</a></li>
-        <li><a href="index.html#faq">FAQ</a></li>
-        <li><a href="index.html#get-it" class="nav-cta">Get it now</a></li>
-      </ul>
-    </nav>
-  </div>
-</header>
+    <a href="index.html" class="back">← Back to Home</a>
+    <h1>How Punctlife works</h1>
+    <p>Punctlife is designed to take the mental load off. It doesn't try to do everything; it focuses on keeping your everyday administrative life in one calm place.</p>
 
-<section class="page-header">
-  <div class="container">
-    <h1>See exactly how it works.</h1>
-    <p>No complicated setup. No manuals. Here is the full walkthrough, from signing up to having your life admin under control.</p>
-  </div>
-</section>
-
-<!-- AICI VOR VENI VIDEO-URILE TALE -->
-<section class="video-container">
-  <div class="video-wrapper">
-    <div class="video-placeholder-text">
-      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"></circle>
-        <polygon points="10 8 16 12 10 16 10 8"></polygon>
-      </svg>
-      <p>Walkthrough video coming soon</p>
+    <div class="step-box">
+      <h3>Step 1 — Open your workspace</h3>
+      <p>Visit the application and create your account. There is no complicated setup, no app store required, and no credit card needed upfront. Your personal dashboard is ready instantly in your browser.</p>
     </div>
-    <!-- 
-      Când ai video-ul gata (ex: pe YouTube), șterge div-ul de mai sus și pune asta:
-      <iframe width="100%" height="100%" src="https://www.youtube.com/embed/ID_VIDEO" title="How it works" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position: absolute; top: 0; left: 0;"></iframe>
-    -->
-  </div>
-</section>
 
-<section class="steps-section">
-  <div class="container">
-    <div class="step-row">
-      <div class="step-number">1</div>
-      <div class="step-content">
-        <h2>Start your 14-day free trial</h2>
-        <p>Create your account in seconds. You get full access to the entire platform for 14 days, completely free. No credit card required upfront, and no hidden fees.</p>
-      </div>
+    <div class="step-box">
+      <h3>Step 2 — Add what matters</h3>
+      <p>Start recording the things that usually live in your head. Add a bill that needs paying, an upcoming medical appointment, a document you need to find, or a letter from an institution you need to reply to.</p>
     </div>
-    <div class="step-row">
-      <div class="step-number">2</div>
-      <div class="step-content">
-        <h2>Add your first document</h2>
-        <p>Don't try to organize everything on day one. Start small. Upload a single bill, add a reminder for an upcoming appointment, or track a subscription you keep forgetting about.</p>
-      </div>
-    </div>
-    <div class="step-row">
-      <div class="step-number">3</div>
-      <div class="step-content">
-        <h2>Let the system do the heavy lifting</h2>
-        <p>The dashboard will naturally guide you through the rest. Recurring bills will show up on time, and documents will stay securely organized. You just sit back and breathe.</p>
-      </div>
-    </div>
-  </div>
-</section>
 
-<div class="container" style="padding-bottom: 80px;">
-  <div class="cta-box">
-    <h2>Ready to take the mental load off?</h2>
-    <p>Start your free 14-day trial today. Organize your life admin in minutes.</p>
-    <a href="index.html#get-it" class="btn">Start my free trial</a>
-  </div>
-</div>
-
-<footer>
-  <div class="container">
-    <div class="footer-links">
-      <a href="mailto:contact_p_life@proton.me">Contact</a>
-      <a href="terms.html">Terms</a>
-      <a href="refund.html">Refund</a>
+    <div class="step-box">
+      <h3>Step 3 — Stay on top of things</h3>
+      <p>Use your dashboard to see exactly what needs your attention today. When something is done, you check it off. The system is built to be reviewed for a few minutes each day, so you can stop worrying about what you might be forgetting.</p>
     </div>
-    <p>Made with care for busy people.</p>
-  </div>
-</footer>
 
+    <h2>Access it anywhere</h2>
+    <p>Because Punctlife is a web application, it works wherever you have a browser. You can open it on your phone while waiting in line, or on your laptop at your desk. <a href="index.html#devices" style="color:#6B7D66;">Learn how to add it to your devices</a>.</p>
+
+    <a href="https://app.punctlife.com/" class="btn">Open Punctlife</a>
+  </div>
 </body>
 </html>
